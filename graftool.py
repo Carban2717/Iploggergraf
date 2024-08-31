@@ -1,3 +1,8 @@
+import os
+
+# Terminali temizle
+os.system('clear' if os.name == 'posix' else 'cls')
+
 ascii_art = """
   ____                 _ _____     _      
  / ___| ___   ___   __| |  ___|_ _| | ___ 
