@@ -1,87 +1,85 @@
-#!/bin/bash
+import os
+import requests
+
+# Renkli metinler için escape kodları
+BLUE = '\033[94m'
+RED = '\033[91m'
+GREEN = '\033[92m'
+WHITE = '\033[97m'
+RESET = '\033[0m'
 
 # Admin şifresi
-ADMIN_PASSWORD="graftooladminkey"
+ADMIN_PASSWORD = "graftooladminkey"
 
-# Admin terminali için log dosyası
-LOG_FILE="admin_log.txt"
+# Admin log dosyası
+LOG_FILE = "admin_log.txt"
 
-# Renkler
-BLUE='\033[94m'
-RED='\033[91m'
-GREEN='\033[92m'
-WHITE='\033[97m'
-RESET='\033[0m'
+def clear_screen():
+    os.system('clear')  # Terminal ekranını temizler
 
-# Menü fonksiyonu
-display_menu() {
-    clear
-    echo -e "${BLUE}   _____ _____            ______ _______ ____   ____  _      ${RESET}"
-    echo -e "${BLUE}  / ____|  __ \     /\   |  ____|__   __/ __ \ / __ \| |     ${RESET}"
-    echo -e "${BLUE} | |  __| |__) |   /  \  | |__     | | | |  | | |  | | |     ${RESET}"
-    echo -e "${BLUE} | | |_ |  _  /   / /\ \ |  __|    | | | |  | | |  | | |     ${RESET}"
-    echo -e "${BLUE} | |__| | | \ \  / ____ \| |       | | | |__| | |__| | |____ ${RESET}"
-    echo -e "${BLUE}  \_____|_|  \_\/_/    \_\_|       |_|  \____/ \____/|______|${RESET}"
-    echo -e "${RED}  _____ _____    _      ____   _____  _____ ______ _____  ${RESET}"
-    echo -e "${RED} |_   _|  __ \  | |    / __ \ / ____|/ ____|  ____|  __ \ ${RESET}"
-    echo -e "${RED}   | | | |__) | | |   | |  | | |  __| |  __| |__  | |__) |${RESET}"
-    echo -e "${RED}   | | |  ___/  | |   | |  | | | |_ | | |_ |  __| |  _  / ${RESET}"
-    echo -e "${RED}  _| |_| |      | |___| |__| | |__| | |__| | |____| | \ \ ${RESET}"
-    echo -e "${RED} |_____|_|      |______\____/ \_____|\_____|______|_|  \_\\${RESET}"
-    echo -e "${GREEN}[01] Çık${RESET}"
-    echo -e "${GREEN}[02] IP Sorgulatma${RESET}"
-    echo -e "${GREEN}[03] Admin Girişi${RESET}"
-}
+def display_menu():
+    clear_screen()
+    print(f"{BLUE}   _____ _____            ______ _______ ____   ____  _      {RESET}")
+    print(f"{BLUE}  / ____|  __ \     /\   |  ____|__   __/ __ \ / __ \| |     {RESET}")
+    print(f"{BLUE} | |  __| |__) |   /  \  | |__     | | | |  | | |  | | |     {RESET}")
+    print(f"{BLUE} | | |_ |  _  /   / /\ \ |  __|    | | | |  | | |  | | |     {RESET}")
+    print(f"{BLUE} | |__| | | \ \  / ____ \| |       | | | |__| | |__| | |____ {RESET}")
+    print(f"{BLUE}  \_____|_|  \_\/_/    \_\_|       |_|  \____/ \____/|______|{RESET}")
+    print(f"{RED}  _____ _____    _      ____   _____  _____ ______ _____  {RESET}")
+    print(f"{RED} |_   _|  __ \  | |    / __ \ / ____|/ ____|  ____|  __ \ {RESET}")
+    print(f"{RED}   | | | |__) | | |   | |  | | |  __| |  __| |__  | |__) |{RESET}")
+    print(f"{RED}   | | |  ___/  | |   | |  | | | |_ | | |_ |  __| |  _  / {RESET}")
+    print(f"{RED}  _| |_| |      | |___| |__| | |__| | |__| | |____| | \ \ {RESET}")
+    print(f"{RED} |_____|_|      |______\____/ \_____|\_____|______|_|  \_\\{RESET}")
+    print(f"{GREEN}[01] Çık{RESET}")
+    print(f"{GREEN}[02] IP Sorgulatma{RESET}")
+    print(f"{GREEN}[03] Admin Girişi{RESET}")
 
-# IP sorgulama fonksiyonu
-ip_sorgulatma() {
-    clear
-    echo -e "${WHITE}IP:${RESET}"
-    read ip
-    if [[ $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        response=$(curl -s "https://ipinfo.io/$ip")
-        if [ $? -eq 0 ]; then
-            echo "$response" | grep -E '"ip"|"city"|"region"|"country"|"org"'
-            echo "IP sorgulandı: $ip" >> "$LOG_FILE"
-            echo "IP bilgileri: $response" >> "$LOG_FILE"
-        else
-            echo -e "${RED}API hatası.${RESET}"
-        fi
-    else
-        echo -e "${RED}Geçerli bir IP adresi girmediniz.${RESET}"
-    fi
-}
+def ip_sorgulatma():
+    clear_screen()
+    print(f"{WHITE}IP:{RESET}")
+    ip = input()
+    if ip.count('.') == 3 and all(part.isdigit() for part in ip.split('.')):  # Basit IP adresi doğrulama
+        response = requests.get(f"https://ipinfo.io/{ip}/json")
+        if response.status_code == 200:
+            data = response.json()
+            print(f"{WHITE}IP: {data.get('ip', 'N/A')}{RESET}")
+            print(f"{WHITE}City: {data.get('city', 'N/A')}{RESET}")
+            print(f"{WHITE}Region: {data.get('region', 'N/A')}{RESET}")
+            print(f"{WHITE}Country: {data.get('country', 'N/A')}{RESET}")
+            print(f"{WHITE}Org: {data.get('org', 'N/A')}{RESET}")
+            with open(LOG_FILE, 'a') as log_file:
+                log_file.write(f"IP sorgulandı: {ip}\n")
+                log_file.write(f"IP bilgileri: {response.text}\n")
+        else:
+            print(f"{RED}API hatası.{RESET}")
+    else:
+        print(f"{RED}Geçerli bir IP adresi girmediniz.{RESET}")
 
-# Admin girişi fonksiyonu
-admin_girisi() {
-    clear
-    echo -e "${RED}Admin Password:${RESET}"
-    read -s password
-    if [ "$password" == "$ADMIN_PASSWORD" ]; then
-        echo -e "${GREEN}Admin girişi başarılı.${RESET}"
-        tail -f "$LOG_FILE"
-    else
-        echo -e "${RED}Yanlış şifre. Menüye dönülüyor.${RESET}"
-    fi
-}
+def admin_girisi():
+    clear_screen()
+    print(f"{RED}Admin Password:{RESET}")
+    password = input()
+    if password == ADMIN_PASSWORD:
+        print(f"{GREEN}Admin girişi başarılı.{RESET}")
+        while True:
+            clear_screen()
+            with open(LOG_FILE, 'r') as log_file:
+                print(log_file.read())
+            input("\nDevam etmek için bir tuşa basın...")
+    else:
+        print(f"{RED}Yanlış şifre. Menüye dönülüyor.{RESET}")
 
-# Ana döngü
-while true; do
-    display_menu
-    read -p "Bir seçenek girin: " secim
+if __name__ == "__main__":
+    while True:
+        display_menu()
+        secim = input("Bir seçenek girin: ")
 
-    case $secim in
-        1)
-            exit 0
-            ;;
-        2)
-            ip_sorgulatma
-            ;;
-        3)
-            admin_girisi
-            ;;
-        *)
-            echo -e "${RED}Geçerli bir seçenek girin.${RESET}"
-            ;;
-    esac
-done
+        if secim == "1":
+            exit()
+        elif secim == "2":
+            ip_sorgulatma()
+        elif secim == "3":
+            admin_girisi()
+        else:
+            print(f"{RED}Geçerli bir seçenek girin.{RESET}")
