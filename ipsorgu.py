@@ -8,6 +8,9 @@ init(autoreset=True)
 # Kullanıcı işlemlerini takip etmek için bir liste
 user_activity_log = []
 
+# IP sorgulama log dosyası
+LOG_FILE = 'sorgulananip.txt'
+
 def clear_screen():
     os.system('clear')
 
@@ -21,19 +24,24 @@ def print_menu():
   \____|_| \_\/_/   \_\_|     |_| \___/ \___/|_____|
                                                     
 """)
-    print(Fore.RED + """
-    _____ _____    _      ____   _____  _____ ______ _____  
- |_   _|  __ \  | |    / __ \ / ____|/ ____|  ____|  __ \ 
-   | | | |__) | | |   | |  | | |  __| |  __| |__  | |__) |
-   | | |  ___/  | |   | |  | | | |_ | | |_ |  __| |  _  / 
-  _| |_| |      | |___| |__| | |__| | |__| | |____| | \ \ 
- |_____|_|      |______\____/ \_____|\_____|______|_|  \_\
-                                                          
-""")                                                          
-    print(Fore.YELLOW + "Developer: carbans2717")
+    print(Fore.RED + "Developer: carbans2717")
     print(Fore.GREEN + "[01] Çıkış")
-    print(Fore.GREEN + "[04] IP Adresi Sorgulama")
-    print(Fore.GREEN + "[05] Admin Panel")
+    print(Fore.GREEN + "[02] IP Adresi Sorgulama")
+    print(Fore.GREEN + "[03] Admin Panel")
+
+def log_ip_info(ip_address, data):
+    with open(LOG_FILE, 'a') as file:
+        file.write(f"IP Adresi: {ip_address}\n")
+        file.write(f"Ülke: {data['country']}\n")
+        file.write(f"Bölge: {data['regionName']}\n")
+        file.write(f"Şehir: {data['city']}\n")
+        file.write(f"ISP: {data['isp']}\n")
+        file.write(f"Organizasyon: {data['org']}\n")
+        file.write(f"AS: {data['as']}\n")
+        file.write(f"Posta Kodu: {data['zip']}\n")
+        file.write(f"Enlem: {data['lat']}\n")
+        file.write(f"Boylam: {data['lon']}\n")
+        file.write("\n")
 
 def get_ip_info(ip_address):
     try:
@@ -57,6 +65,9 @@ def get_ip_info(ip_address):
 
         # Kullanıcı işlemi kaydediliyor
         user_activity_log.append(f"IP sorgulandı: {ip_address} - {data['country']}, {data['city']}, {data['isp']}")
+
+        # IP bilgilerini log dosyasına kaydet
+        log_ip_info(ip_address, data)
     except requests.RequestException as e:
         print(Fore.RED + "Bir hata oluştu:", e)
 
@@ -70,6 +81,15 @@ def admin_panel():
         print(Fore.GREEN + "Kullanıcı aktiviteleri:")
         for activity in user_activity_log:
             print(Fore.GREEN + activity)
+        
+        # Admin log dosyasının içeriğini göster
+        print(Fore.GREEN + "\nSorgulanan IP bilgileri:")
+        if os.path.exists(LOG_FILE):
+            with open(LOG_FILE, 'r') as file:
+                print(file.read())
+        else:
+            print(Fore.RED + "Log dosyası bulunamadı.")
+            
         input(Fore.GREEN + "Devam etmek için bir tuşa basın...")
     else:
         print(Fore.RED + "Yanlış şifre. Geri dönülüyor...")
@@ -78,14 +98,14 @@ def admin_panel():
 def main():
     while True:
         print_menu()
-        choice = input(Fore.GREEN + "Seçiminizi yapın (1, 4 veya 5): ")
+        choice = input(Fore.GREEN + "Seçiminizi yapın (1, 2 veya 3): ")
 
         if choice == '1':
             clear_screen()
             print(Fore.GREEN + "Çıkış yapılıyor...")
             time.sleep(1)
             break
-        elif choice == '4':
+        elif choice == '2':
             clear_screen()
             print(Fore.WHITE + "IP Adresi:")
             ip_address = input()
@@ -93,7 +113,7 @@ def main():
             print(Fore.GREEN + f"{ip_address} adresi sorgulanıyor...")
             get_ip_info(ip_address)
             input(Fore.GREEN + "Devam etmek için bir tuşa basın...")
-        elif choice == '5':
+        elif choice == '3':
             admin_panel()
         else:
             clear_screen()
