@@ -24,7 +24,16 @@ def print_menu():
   \____|_| \_\/_/   \_\_|     |_| \___/ \___/|_____|
                                                     
 """)
-    print(Fore.RED + "Developer: carbans2717")
+    print(Fore.RED + """
+  _____ _____    _      ____   _____  _____ ______ _____  
+ |_   _|  __ \  | |    / __ \ / ____|/ ____|  ____|  __ \ 
+   | | | |__) | | |   | |  | | |  __| |  __| |__  | |__) |
+   | | |  ___/  | |   | |  | | | |_ | | |_ |  __| |  _  / 
+  _| |_| |      | |___| |__| | |__| | |__| | |____| | \ \ 
+ |_____|_|      |______\____/ \_____|\_____|______|_|  \_\
+                                                          
+""")                                                      
+    print(Fore.YELLOW + "Developer: carbans2717")
     print(Fore.GREEN + "[01] Çıkış")
     print(Fore.GREEN + "[02] IP Adresi Sorgulama")
     print(Fore.GREEN + "[03] Admin Panel")
