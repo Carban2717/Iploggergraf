@@ -1,85 +1,104 @@
 import os
+import time
 import requests
+from colorama import Fore, init
 
-# Renkli metinler için escape kodları
-BLUE = '\033[94m'
-RED = '\033[91m'
-GREEN = '\033[92m'
-WHITE = '\033[97m'
-RESET = '\033[0m'
+init(autoreset=True)
 
-# Admin şifresi
-ADMIN_PASSWORD = "graftooladminkey"
-
-# Admin log dosyası
-LOG_FILE = "admin_log.txt"
+# Kullanıcı işlemlerini takip etmek için bir liste
+user_activity_log = []
 
 def clear_screen():
-    os.system('clear')  # Terminal ekranını temizler
+    os.system('clear')
 
-def display_menu():
+def print_menu():
     clear_screen()
-    print(f"{BLUE}   _____ _____            ______ _______ ____   ____  _      {RESET}")
-    print(f"{BLUE}  / ____|  __ \     /\   |  ____|__   __/ __ \ / __ \| |     {RESET}")
-    print(f"{BLUE} | |  __| |__) |   /  \  | |__     | | | |  | | |  | | |     {RESET}")
-    print(f"{BLUE} | | |_ |  _  /   / /\ \ |  __|    | | | |  | | |  | | |     {RESET}")
-    print(f"{BLUE} | |__| | | \ \  / ____ \| |       | | | |__| | |__| | |____ {RESET}")
-    print(f"{BLUE}  \_____|_|  \_\/_/    \_\_|       |_|  \____/ \____/|______|{RESET}")
-    print(f"{RED}  _____ _____    _      ____   _____  _____ ______ _____  {RESET}")
-    print(f"{RED} |_   _|  __ \  | |    / __ \ / ____|/ ____|  ____|  __ \ {RESET}")
-    print(f"{RED}   | | | |__) | | |   | |  | | |  __| |  __| |__  | |__) |{RESET}")
-    print(f"{RED}   | | |  ___/  | |   | |  | | | |_ | | |_ |  __| |  _  / {RESET}")
-    print(f"{RED}  _| |_| |      | |___| |__| | |__| | |__| | |____| | \ \ {RESET}")
-    print(f"{RED} |_____|_|      |______\____/ \_____|\_____|______|_|  \_\\{RESET}")
-    print(f"{GREEN}[01] Çık{RESET}")
-    print(f"{GREEN}[02] IP Sorgulatma{RESET}")
-    print(f"{GREEN}[03] Admin Girişi{RESET}")
+    print(Fore.BLUE + """
+   ____ ____      _    _____ _____ ___   ___  _     
+  / ___|  _ \    / \  |  ___|_   _/ _ \ / _ \| |    
+ | |  _| |_) |  / _ \ | |_    | || | | | | | | |    
+ | |_| |  _ <  / ___ \|  _|   | || |_| | |_| | |___ 
+  \____|_| \_\/_/   \_\_|     |_| \___/ \___/|_____|
+                                                    
+""")
+    print(Fore.RED + """
+    _____ _____    _      ____   _____  _____ ______ _____  
+ |_   _|  __ \  | |    / __ \ / ____|/ ____|  ____|  __ \ 
+   | | | |__) | | |   | |  | | |  __| |  __| |__  | |__) |
+   | | |  ___/  | |   | |  | | | |_ | | |_ |  __| |  _  / 
+  _| |_| |      | |___| |__| | |__| | |__| | |____| | \ \ 
+ |_____|_|      |______\____/ \_____|\_____|______|_|  \_\
+                                                          
+""")                                                          
+    print(Fore.YELLOW + "Developer: carbans2717")
+    print(Fore.GREEN + "[01] Çıkış")
+    print(Fore.GREEN + "[04] IP Adresi Sorgulama")
+    print(Fore.GREEN + "[05] Admin Panel")
 
-def ip_sorgulatma():
-    clear_screen()
-    print(f"{WHITE}IP:{RESET}")
-    ip = input()
-    if ip.count('.') == 3 and all(part.isdigit() for part in ip.split('.')):  # Basit IP adresi doğrulama
-        response = requests.get(f"https://ipinfo.io/{ip}/json")
-        if response.status_code == 200:
-            data = response.json()
-            print(f"{WHITE}IP: {data.get('ip', 'N/A')}{RESET}")
-            print(f"{WHITE}City: {data.get('city', 'N/A')}{RESET}")
-            print(f"{WHITE}Region: {data.get('region', 'N/A')}{RESET}")
-            print(f"{WHITE}Country: {data.get('country', 'N/A')}{RESET}")
-            print(f"{WHITE}Org: {data.get('org', 'N/A')}{RESET}")
-            with open(LOG_FILE, 'a') as log_file:
-                log_file.write(f"IP sorgulandı: {ip}\n")
-                log_file.write(f"IP bilgileri: {response.text}\n")
-        else:
-            print(f"{RED}API hatası.{RESET}")
-    else:
-        print(f"{RED}Geçerli bir IP adresi girmediniz.{RESET}")
+def get_ip_info(ip_address):
+    try:
+        response = requests.get(f"http://ip-api.com/json/{ip_address}")
+        data = response.json()
 
-def admin_girisi():
+        if data['status'] == 'fail':
+            print(Fore.RED + "Hatalı IP adresi girdiniz.")
+            return
+
+        print(Fore.GREEN + f"IP Adresi: {data['query']}")
+        print(Fore.GREEN + f"Ülke: {data['country']}")
+        print(Fore.GREEN + f"Bölge: {data['regionName']}")
+        print(Fore.GREEN + f"Şehir: {data['city']}")
+        print(Fore.GREEN + f"ISP: {data['isp']}")
+        print(Fore.GREEN + f"Organizasyon: {data['org']}")
+        print(Fore.GREEN + f"AS: {data['as']}")
+        print(Fore.GREEN + f"Posta Kodu: {data['zip']}")
+        print(Fore.GREEN + f"Enlem: {data['lat']}")
+        print(Fore.GREEN + f"Boylam: {data['lon']}")
+
+        # Kullanıcı işlemi kaydediliyor
+        user_activity_log.append(f"IP sorgulandı: {ip_address} - {data['country']}, {data['city']}, {data['isp']}")
+    except requests.RequestException as e:
+        print(Fore.RED + "Bir hata oluştu:", e)
+
+def admin_panel():
     clear_screen()
-    print(f"{RED}Admin Password:{RESET}")
+    print(Fore.RED + "Admin Password:")
     password = input()
-    if password == ADMIN_PASSWORD:
-        print(f"{GREEN}Admin girişi başarılı.{RESET}")
-        while True:
-            clear_screen()
-            with open(LOG_FILE, 'r') as log_file:
-                print(log_file.read())
-            input("\nDevam etmek için bir tuşa basın...")
+    if password == "graftooladminkey":
+        clear_screen()
+        print(Fore.GREEN + "Admin terminaline hoş geldiniz!")
+        print(Fore.GREEN + "Kullanıcı aktiviteleri:")
+        for activity in user_activity_log:
+            print(Fore.GREEN + activity)
+        input(Fore.GREEN + "Devam etmek için bir tuşa basın...")
     else:
-        print(f"{RED}Yanlış şifre. Menüye dönülüyor.{RESET}")
+        print(Fore.RED + "Yanlış şifre. Geri dönülüyor...")
+        time.sleep(1)
+
+def main():
+    while True:
+        print_menu()
+        choice = input(Fore.GREEN + "Seçiminizi yapın (1, 4 veya 5): ")
+
+        if choice == '1':
+            clear_screen()
+            print(Fore.GREEN + "Çıkış yapılıyor...")
+            time.sleep(1)
+            break
+        elif choice == '4':
+            clear_screen()
+            print(Fore.WHITE + "IP Adresi:")
+            ip_address = input()
+            clear_screen()
+            print(Fore.GREEN + f"{ip_address} adresi sorgulanıyor...")
+            get_ip_info(ip_address)
+            input(Fore.GREEN + "Devam etmek için bir tuşa basın...")
+        elif choice == '5':
+            admin_panel()
+        else:
+            clear_screen()
+            print(Fore.RED + "Geçersiz seçim. Lütfen tekrar deneyin.")
+            time.sleep(1)
 
 if __name__ == "__main__":
-    while True:
-        display_menu()
-        secim = input("Bir seçenek girin: ")
-
-        if secim == "1":
-            exit()
-        elif secim == "2":
-            ip_sorgulatma()
-        elif secim == "3":
-            admin_girisi()
-        else:
-            print(f"{RED}Geçerli bir seçenek girin.{RESET}")
+    main()
